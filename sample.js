@@ -16,11 +16,12 @@ log("Registered click events");
 var settings = {
     identity_server_uri: 'http://vrswandbisst01/Retailsuite/IdentityServer/',
     client_id: 'rsscale',
-    redirect_uri: 'http://vrswandbisst01/test/sample/public/test.html',
-    post_logout_redirect_uri: 'http://vrswandbisst01/test/sample/public/test.html',
+    redirect_uri: 'http://vrswandbisst01/test/',
+    post_logout_redirect_uri: 'http://vrswandbisst01/test/',
     response_type: 'id_token token',
     scope: 'openid'
 };
+
 var client = new OidcClient(settings);
 var currentUser = null;
 var currentResponse = null;

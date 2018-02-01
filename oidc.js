@@ -2,11 +2,25 @@ var OidcClient = function(settings) {
     var self = this;
     self.settings = settings;
     self.jwtDecode = parseJwt;
+    self.openIdConfig = {};
+
+    self.init = function(initSettings){
+        if(initSettings){
+            self.settings = initSettings;
+        }
+        if (!self.settings.identity_server_uri) {
+            throw new Error('identityServer uri is not defined.')
+        }
+        self.ajaxGet(self.settings.identity_server_uri + '.well-known/openid-configuration', function(response){
+            self.openIdConfig = JSON.parse(response);
+        }, function(error){
+            throw new Error('An error occurred while contacting identityServer: ' + error)
+        });
+    }
 
     self.createSigninRequest = function(resolve, reject) {
         try {
-            var authorizationUrl =
-                settings.identity_server_uri + "connect/authorize";
+            var authorizationUrl = self.openIdConfig.authorization_endpoint;
 
             var params = {
                 client_id: settings.client_id,
@@ -70,6 +84,8 @@ var OidcClient = function(settings) {
         var url = endSessionUrl + '?id_token_hint=' + settings.id_token_hint + '&post_logout_redirect_uri=' + post_logout_redirect_uri;
         resolve(url);
     };
+
+    self.init();
 
     return self;
 
