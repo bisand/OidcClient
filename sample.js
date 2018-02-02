@@ -49,8 +49,9 @@ function signout(){
 
 client.processSigninResponse(function(response){
     currentResponse = response;
-    var decoded = client.jwtDecode(response.id_token);
-    log('Response: ' + JSON.stringify(response, null, 2) + '<br/>JWT: ' + JSON.stringify(decoded, null, 2));
+    var idToken = client.jwtDecode(response.id_token);
+    var accessToken = client.jwtDecode(response.access_token);
+    log('Response: ' + JSON.stringify(response, null, 2) + '<br/>id_token: ' + JSON.stringify(idToken, null, 2) + '<br/>access_token: ' + JSON.stringify(accessToken, null, 2));
 
 }, function(error){
     log('ERROR: ' + error);

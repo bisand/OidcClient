@@ -11,14 +11,14 @@ var OidcClient = function(settings) {
         if (!self.settings.identity_server_uri) {
             throw new Error("identityServer uri is not defined.");
         }
-        getOidConfig(
-            function(response) {
-                self.openIdConfig = JSON.parse(response);
-            },
-            function(error) {
-                throw new Error("An error occurred while contacting identityServer: " + error);
-            }
-        );
+        // getOidConfig(
+        //     function(response) {
+        //         self.openIdConfig = JSON.parse(response);
+        //     },
+        //     function(error) {
+        //         throw new Error("An error occurred while contacting identityServer: " + error);
+        //     }
+        // );
     };
 
     self.createSigninRequest = function(resolve, reject) {
