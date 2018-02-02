@@ -1,4 +1,4 @@
-var OidcClient = function(settings) {
+var OidcClient = function(settings, initComplete) {
     var self = new Object();
     if (!settings) {
         throw new Error("Required parameter settings is not defined.");
@@ -10,10 +10,7 @@ var OidcClient = function(settings) {
     self.jwtDecode = _parseJwt;
     self.openIdConfig = {};
 
-    self.init = function(initSettings, resolve, reject) {
-        if (initSettings) {
-            self.settings = initSettings;
-        }
+    self.init = function(resolve, reject) {
         if (!self.settings.identity_server_uri) {
             throw new Error("Required settings property identity_server_uri is not defined.");
         }
@@ -297,6 +294,6 @@ var OidcClient = function(settings) {
         return JSON.parse(window.atob(base64));
     }
 
-    self.init();
+    self.init(initComplete);
     return self;
 };
