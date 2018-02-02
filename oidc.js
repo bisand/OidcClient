@@ -11,8 +11,8 @@ var OidcClient = function(settings, initComplete) {
     self.openIdConfig = {};
 
     self.init = function(resolve, reject) {
-        if (!self.settings.identity_server_uri) {
-            throw new Error("Required settings property identity_server_uri is not defined.");
+        if (!self.settings.authority) {
+            throw new Error("Required settings property authority is not defined.");
         }
         _getOidConfig(
             function(response) {
@@ -139,6 +139,24 @@ var OidcClient = function(settings, initComplete) {
     /////////////////////////////////////////////
     // Private functions
     /////////////////////////////////////////////
+    function _getOidConfig(resolve, reject) {
+        self.ajaxGet(
+            self.settings.authority + ".well-known/openid-configuration",
+            function(response) {
+                if (resolve) {
+                    resolve(response);
+                }
+            },
+            function(error) {
+                if (reject) {
+                    reject(error);
+                }
+            },
+            true
+        );
+    }
+    self.init(initComplete);
+
     function _createSigninRequest(resolve, reject) {
         try {
             if (!self.openIdConfig.authorization_endpoint) {
@@ -209,22 +227,6 @@ var OidcClient = function(settings, initComplete) {
             }
         }
     }
-    function _getOidConfig(resolve, reject) {
-        self.ajaxGet(
-            self.settings.identity_server_uri + ".well-known/openid-configuration",
-            function(response) {
-                if (resolve) {
-                    resolve(response);
-                }
-            },
-            function(error) {
-                if (reject) {
-                    reject(error);
-                }
-            },
-            true
-        );
-    }
 
     function _serializeParams(params) {
         if (!params) {
@@ -294,6 +296,5 @@ var OidcClient = function(settings, initComplete) {
         return JSON.parse(window.atob(base64));
     }
 
-    self.init(initComplete);
     return self;
 };

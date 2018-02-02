@@ -12,7 +12,7 @@ try {
 log("Registered click events");
 
 var settings = {
-    identity_server_uri: "http://vrswandbisst01/Retailsuite/IdentityServer/",
+    authority: "http://vrswandbisst01/Retailsuite/IdentityServer/",
     client_id: "rsscale",
     redirect_uri: "http://vrswandbisst01/test/",
     post_logout_redirect_uri: "http://vrswandbisst01/test/",
@@ -23,7 +23,10 @@ var settings = {
 
 var client = new OidcClient(settings, function(config) {
     // alert(JSON.stringify(config, null, 2));
+    console.log('Init complete! @ ' +  Date.now());
 });
+console.log('Client created! @ ' +  Date.now());
+
 var currentUser = null;
 var currentResponse = null;
 
