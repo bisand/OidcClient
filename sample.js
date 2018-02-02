@@ -19,7 +19,8 @@ var settings = {
     redirect_uri: 'http://vrswandbisst01/test/',
     post_logout_redirect_uri: 'http://vrswandbisst01/test/',
     response_type: 'id_token token',
-    scope: 'openid'
+    scope: 'openid rs scale',
+    acr_values: 'tenant:10000'
 };
 
 var client = new OidcClient(settings);
