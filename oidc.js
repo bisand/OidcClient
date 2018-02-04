@@ -251,30 +251,42 @@ var OidcClient = function(settings, initComplete) {
     }
 
     function _processResponse() {
-        var hashPos = window.location.hash.indexOf("#") + 1;
-        if (hashPos < 0) {
-            return null;
+        var queryPos = window.location.href.indexOf("?") + 1;
+        if (queryPos < 0) {
+            queryPos = window.location.href.indexOf("#") + 1;
+            if (queryPos < 0) {
+                return null;
+            }
         }
-        var hash = window.location.hash.substr(hashPos);
-        var result = hash.split("&").reduce(function(result, item) {
+        var res = window.location.href.substr(queryPos);
+        var result = res.split("&").reduce(function(result, item) {
             var parts = item.split("=");
             result[parts[0]] = parts[1];
             return result;
         }, {});
 
         if (!result.error) {
+            if (result.id_token) {
+                result.id_token_object = _parseJwt(result.id_token);
+            }
+            if (result.access_token) {
+                result.access_token_object = _parseJwt(result.access_token);
+            }
             return result;
         }
         return null;
     }
 
     function _processToken(tokenType) {
-        var hashPos = window.location.hash.indexOf(tokenType);
-        if (hashPos < 0) {
-            return null;
+        var queryPos = window.location.href.indexOf("?") + 1;
+        if (queryPos < 0) {
+            queryPos = window.location.href.indexOf("#") + 1;
+            if (queryPos < 0) {
+                return null;
+            }
         }
-        var hash = window.location.hash.substr(hashPos);
-        var result = hash.split("&").reduce(function(result, item) {
+        var res = window.location.href.substr(queryPos);
+        var result = res.split("&").reduce(function(result, item) {
             var parts = item.split("=");
             result[parts[0]] = parts[1];
             return result;
