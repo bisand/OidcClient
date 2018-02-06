@@ -1,5 +1,5 @@
 var OidcClient = function(settings, initComplete) {
-    var self = new Object();
+    var self = {};
     if (!settings) {
         throw new Error("Required parameter settings is not defined.");
         return self;
@@ -18,7 +18,7 @@ var OidcClient = function(settings, initComplete) {
             function(response) {
                 self.openIdConfig = JSON.parse(response);
                 if (resolve) {
-                    resolve(self.openIdConfig);
+                    resolve(self);
                 }
             },
             function(error) {
