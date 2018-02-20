@@ -115,7 +115,7 @@ var OidcClient = function(settings, initComplete) {
                 self.init(
                     null,
                     function() {
-                        self.ajaxPost(url, contentType, body, resolve, reject);
+                        self.ajaxPost(url, access_token, contentType, body, resolve, reject);
                     },
                     function(error) {
                         if (reject) {
@@ -125,7 +125,7 @@ var OidcClient = function(settings, initComplete) {
                 );
                 return null;
             }
-            self.ajaxPost(url, contentType, body, resolve, reject);
+            self.ajaxPost(url, access_token, contentType, body, resolve, reject);
         } catch (error) {
             if (reject) {
                 reject(error);
@@ -134,7 +134,7 @@ var OidcClient = function(settings, initComplete) {
         return null;
     };
 
-    self.ajaxGet = function(url, resolve, reject, asyncCall) {
+    self.ajaxGet = function(url, access_token, resolve, reject, asyncCall) {
         if (asyncCall === undefined) {
             asyncCall = true;
         }
@@ -152,6 +152,9 @@ var OidcClient = function(settings, initComplete) {
                     }
                 }
             };
+            if (access_token) {
+                xhr.setRequestHeader("Authorization", "Bearer " + access_token);
+            }
             xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
             if (asyncCall) {
                 xhr.timeout = 30000; // Set timeout to 30 seconds (30000 milliseconds)
@@ -170,7 +173,7 @@ var OidcClient = function(settings, initComplete) {
         }
     };
 
-    self.ajaxPost = function(url, contentType, body, resolve, reject, asyncCall) {
+    self.ajaxPost = function(url, access_token, contentType, body, resolve, reject, asyncCall) {
         if (asyncCall === undefined) {
             asyncCall = true;
         }
@@ -188,6 +191,9 @@ var OidcClient = function(settings, initComplete) {
                     }
                 }
             };
+            if (access_token) {
+                xhr.setRequestHeader("Authorization", "Bearer " + access_token);
+            }
             xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
             xhr.setRequestHeader("Content-Type", contentType);
             if (asyncCall) {
@@ -213,6 +219,7 @@ var OidcClient = function(settings, initComplete) {
     function _getOidConfig(resolve, reject) {
         self.ajaxGet(
             self.settings.authority + ".well-known/openid-configuration",
+            null,
             function(response) {
                 if (resolve) {
                     resolve(response);
