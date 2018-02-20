@@ -75,13 +75,13 @@ var OidcClient = function(settings, initComplete) {
         }
     };
 
-    self.createSignoutRequest = function(settings, resolve, reject) {
+    self.createSignoutRequest = function(id_token_hint, settings, resolve, reject) {
         try {
             if (!self.openIdConfig.end_session_endpoint) {
                 self.init(
                     null,
                     function() {
-                        return _createSignoutRequest(settings, resolve, reject);
+                        return _createSignoutRequest(id_token_hint, settings, resolve, reject);
                     },
                     function(error) {
                         if (reject) {
@@ -91,7 +91,41 @@ var OidcClient = function(settings, initComplete) {
                 );
                 return null;
             }
-            return _createSignoutRequest(settings, resolve, reject);
+            return _createSignoutRequest(id_token_hint, settings, resolve, reject);
+        } catch (error) {
+            if (reject) {
+                reject(error);
+            }
+        }
+        return null;
+    };
+
+    self.revokeToken = function(access_token, settings, resolve, reject) {
+        var url = self.openIdConfig.revocation_endpoint;
+        var contentType = "application/x-www-form-urlencoded";
+        var body = "client_id=" + encodeURIComponent(settings.client_id);
+        if (settings.client_secret) {
+            body += "&client_secret=" + encodeURIComponent(settings.client_secret);
+        }
+        body += "&token=" + encodeURIComponent(access_token);
+        body += "&token_type_hint=access_token";
+
+        try {
+            if (!self.openIdConfig.revocation_endpoint) {
+                self.init(
+                    null,
+                    function() {
+                        self.ajaxPost(url, contentType, body, resolve, reject);
+                    },
+                    function(error) {
+                        if (reject) {
+                            reject(error);
+                        }
+                    }
+                );
+                return null;
+            }
+            self.ajaxPost(url, contentType, body, resolve, reject);
         } catch (error) {
             if (reject) {
                 reject(error);
@@ -112,7 +146,7 @@ var OidcClient = function(settings, initComplete) {
                     if (resolve) {
                         resolve(xhr.responseText);
                     }
-                } else if (xhr.status != 200) {
+                } else if (xhr.readyState > 3 && xhr.status != 200) {
                     if (reject) {
                         reject(xhr.responseText);
                     }
@@ -128,6 +162,43 @@ var OidcClient = function(settings, initComplete) {
                 };
             }
             xhr.send();
+            return xhr;
+        } catch (error) {
+            if (reject) {
+                reject(error);
+            }
+        }
+    };
+
+    self.ajaxPost = function(url, contentType, body, resolve, reject, asyncCall) {
+        if (asyncCall === undefined) {
+            asyncCall = true;
+        }
+        try {
+            var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+            xhr.open("POST", url, asyncCall);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState > 3 && xhr.status == 200) {
+                    if (resolve) {
+                        resolve(xhr.responseText);
+                    }
+                } else if (xhr.readyState > 3 && xhr.status != 200) {
+                    if (reject) {
+                        reject(xhr.responseText);
+                    }
+                }
+            };
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            xhr.setRequestHeader("Content-Type", contentType);
+            if (asyncCall) {
+                xhr.timeout = 30000; // Set timeout to 30 seconds (30000 milliseconds)
+                xhr.ontimeout = function() {
+                    if (reject) {
+                        reject("Request timed out.");
+                    }
+                };
+            }
+            xhr.send(body);
             return xhr;
         } catch (error) {
             if (reject) {
@@ -188,7 +259,7 @@ var OidcClient = function(settings, initComplete) {
         return null;
     }
 
-    function _createSignoutRequest(settings, resolve, reject) {
+    function _createSignoutRequest(id_token_hint, settings, resolve, reject) {
         try {
             if (!settings && !settings.id_token_hint) {
                 if (reject) {
@@ -214,10 +285,10 @@ var OidcClient = function(settings, initComplete) {
                 : self.settings.post_logout_redirect_uri;
             var url =
                 endSessionUrl +
-                "?id_token_hint=" +
-                settings.id_token_hint +
-                "&post_logout_redirect_uri=" +
-                post_logout_redirect_uri;
+                "?post_logout_redirect_uri=" +
+                encodeURIComponent(post_logout_redirect_uri) +
+                "&id_token_hint=" +
+                encodeURIComponent(settings.id_token_hint);
             if (resolve) {
                 resolve(url);
             }
